@@ -11,7 +11,7 @@ fn seed() -> u64 {
     let seed = seed
         .wrapping_mul(6364136223846793005)
         .wrapping_add(1442695040888963407)
-        .wrapping_add(SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_nanos() as u64);
+        .wrapping_add(SystemTime::now().duration_since(UNIX_EPOCH).unwrap_or_default().as_nanos() as u64);
     seed.wrapping_mul(6364136223846793005)
         .wrapping_add(1442695040888963407)
 }
