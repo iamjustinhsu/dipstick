@@ -218,7 +218,7 @@ impl Gauge {
 
 #[derive(Debug, Clone)]
 pub struct Percentile {
-    inner: InputMetric
+    inner: InputMetric,
 }
 
 impl Percentile {

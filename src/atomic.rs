@@ -10,7 +10,6 @@ use crate::{Flush, MetricValue, Void};
 
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
-use std::isize;
 use std::mem;
 use std::sync::atomic::AtomicIsize;
 use std::sync::atomic::Ordering::*;
@@ -187,7 +186,7 @@ impl AtomicBucket {
     }
 
     /// Set the default stats aggregated metrics flush output.
-    pub fn default_drain(default_config: impl Input + Send + Sync + 'static) {
+    pub fn default_drain(default_config: impl Input + 'static) {
         *write_lock!(DEFAULT_AGGREGATE_INPUT) = Arc::new(default_config);
     }
 
@@ -226,12 +225,12 @@ impl AtomicBucket {
 
     /// Set this stats's aggregated metrics flush output.
     #[deprecated(since = "0.7.2", note = "Use drain()")]
-    pub fn set_drain(&self, new_drain: impl Input + Send + Sync + 'static) {
+    pub fn set_drain(&self, new_drain: impl Input + 'static) {
         self.drain(new_drain)
     }
 
     /// Set this stats's aggregated metrics flush output.
-    pub fn drain(&self, new_drain: impl Input + Send + Sync + 'static) {
+    pub fn drain(&self, new_drain: impl Input + 'static) {
         write_lock!(self.inner).drain = Some(Arc::new(new_drain))
     }
 
@@ -305,9 +304,11 @@ impl AtomicScores {
     pub fn new(kind: InputKind) -> Self {
         AtomicScores {
             kind,
-            scores: unsafe { mem::transmute(AtomicScores::blank()) },
+            scores: unsafe {
+                mem::transmute::<[isize; 4], [AtomicIsize; 4]>(AtomicScores::blank())
+            },
             percentile_scores: std::sync::Mutex::new(Vec::new()),
-            percentiles: vec![0, 25, 50, 75, 90, 100]
+            percentiles: vec![0, 25, 50, 75, 90, 100],
         }
     }
 
@@ -352,7 +353,11 @@ impl AtomicScores {
     }
 
     /// Reset scores to zero, return previous values
-    fn snapshot(&self, scores: &mut [isize; 4], percentile_scores: &mut Vec<(isize, isize)>) -> bool {
+    fn snapshot(
+        &self,
+        scores: &mut [isize; 4],
+        percentile_scores: &mut Vec<(isize, isize)>,
+    ) -> bool {
         // NOTE copy timestamp, count AND sum _before_ testing for data to reduce concurrent discrepancies
         scores[HIT] = self.scores[HIT].swap(0, AcqRel);
         scores[SUM] = self.scores[SUM].swap(0, AcqRel);

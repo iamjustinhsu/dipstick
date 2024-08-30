@@ -42,8 +42,11 @@ pub fn stats_all(
             name.make_name("rate"),
             rate.round() as MetricValue,
         )),
-        ScoreType::Percentile((percentile, value)) => 
-            Some((InputKind::Percentile, name.make_name(format!("percentile_{percentile}")), value)),
+        ScoreType::Percentile((percentile, value)) => Some((
+            InputKind::Percentile,
+            name.make_name(format!("percentile_{percentile}")),
+            value,
+        )),
     }
 }
 
