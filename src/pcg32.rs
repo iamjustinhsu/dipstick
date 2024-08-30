@@ -1,7 +1,6 @@
 //! PCG32 random number generation for fast sampling
 //! Kept here for low dependency count.
 
-#![cfg_attr(feature = "tool_lints", allow(clippy::unreadable_literal))]
 #![allow(clippy::unreadable_literal)]
 
 use std::{cell::RefCell, time::{SystemTime, UNIX_EPOCH}};
@@ -11,9 +10,16 @@ fn seed() -> u64 {
     let seed = seed
         .wrapping_mul(6364136223846793005)
         .wrapping_add(1442695040888963407)
-        .wrapping_add(SystemTime::now().duration_since(UNIX_EPOCH).unwrap_or_default().as_nanos() as u64);
+        .wrapping_add(current_time_millis());
     seed.wrapping_mul(6364136223846793005)
         .wrapping_add(1442695040888963407)
+}
+
+fn current_time_millis() -> u64 {
+    SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .unwrap()
+        .as_millis() as u64
 }
 
 /// quickly return a random int
