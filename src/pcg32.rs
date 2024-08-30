@@ -3,7 +3,10 @@
 
 #![allow(clippy::unreadable_literal)]
 
-use std::{cell::RefCell, time::{SystemTime, UNIX_EPOCH}};
+use std::{
+    cell::RefCell,
+    time::{SystemTime, UNIX_EPOCH},
+};
 
 fn seed() -> u64 {
     let seed = 5573589319906701683_u64;

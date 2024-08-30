@@ -304,9 +304,11 @@ impl AtomicScores {
     pub fn new(kind: InputKind) -> Self {
         AtomicScores {
             kind,
-            scores: unsafe { mem::transmute::<[isize; 4], [AtomicIsize; 4]>(AtomicScores::blank()) },
+            scores: unsafe {
+                mem::transmute::<[isize; 4], [AtomicIsize; 4]>(AtomicScores::blank())
+            },
             percentile_scores: std::sync::Mutex::new(Vec::new()),
-            percentiles: vec![0, 25, 50, 75, 90, 100]
+            percentiles: vec![0, 25, 50, 75, 90, 100],
         }
     }
 
@@ -351,7 +353,11 @@ impl AtomicScores {
     }
 
     /// Reset scores to zero, return previous values
-    fn snapshot(&self, scores: &mut [isize; 4], percentile_scores: &mut Vec<(isize, isize)>) -> bool {
+    fn snapshot(
+        &self,
+        scores: &mut [isize; 4],
+        percentile_scores: &mut Vec<(isize, isize)>,
+    ) -> bool {
         // NOTE copy timestamp, count AND sum _before_ testing for data to reduce concurrent discrepancies
         scores[HIT] = self.scores[HIT].swap(0, AcqRel);
         scores[SUM] = self.scores[SUM].swap(0, AcqRel);
